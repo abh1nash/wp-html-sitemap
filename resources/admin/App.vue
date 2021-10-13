@@ -23,6 +23,7 @@
       v-for="(category, index) in categoriesList"
       :key="index"
       :category="category"
+      :index="index"
       @update-category="(data) => updateCategory(index, data)"
       @delete-category="() => deleteCategory(index)"
       @exclude="(pageId) => excludePage(index, pageId)"

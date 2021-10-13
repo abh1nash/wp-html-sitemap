@@ -46,6 +46,7 @@ class SitemapShortcode extends WordPressShortcodesServiceProvider {
     foreach ($categories as $index => $category) {
       $parsedData[$index] = [
         "pages" => [],
+        "contain" => $category["contain"],
         "name" => $category["name"],
         "url" => $category["url"]
       ];
@@ -55,6 +56,21 @@ class SitemapShortcode extends WordPressShortcodesServiceProvider {
         }
       }
     }
+
+    foreach ($parsedData as $i => $category) {
+      if($category["contain"] == "unlisted") {
+        foreach ($parsedData as $j => $compareCategory) {
+          if($i != $j && $compareCategory["contain"] != "unlisted") {
+            foreach ($category["pages"] as $pageKey => $page) {
+              if( \in_array($page, $compareCategory["pages"]) ) {
+                unset( $parsedData[$i]["pages"][$pageKey] );
+              }
+            }
+          }
+        }
+      }
+    }
+
     return AKSitemap()->view( 'sitemap.index' )
                       ->with(['data' => $parsedData]);
   }

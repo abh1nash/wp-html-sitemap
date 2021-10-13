@@ -55,7 +55,10 @@ import CategorySectionTitle from "./CategorySectionTitle.vue";
 import PagesList from "./PagesList.vue";
 
 export default defineComponent({
-  props: { category: {} as PropType<Category> },
+  props: {
+    category: {} as PropType<Category>,
+    index: Number as PropType<number>,
+  },
   components: { Card, CategorySectionTitle, PagesList, Dropdown, Button },
   emits: ["updateCategory", "deleteCategory", "exclude", "include", "move"],
   setup(props, { emit }) {
@@ -66,6 +69,8 @@ export default defineComponent({
       emit("deleteCategory");
     };
     const pagesList: Ref<Page[]> = inject("pagesList");
+    const categoriesList: Ref<Category[]> = inject("categoriesList");
+
     const exclude = (pageId) => {
       emit("exclude", pageId);
     };
@@ -76,56 +81,52 @@ export default defineComponent({
     const addToInclude = () => {
       include(newInclude.value);
     };
-    const displayablePages = computed(() => {
-      let display = ref<Page[]>([]);
 
-      display.value = pagesList.value.filter((page) => {
+    const pagesForCategory = (categoryIndex: number) => {
+      let pages = ref<Page[]>([]);
+
+      pages.value = pagesList.value.filter((page) => {
         let show: boolean = true;
-        if (props.category.contain == "selected") {
+        if (categoriesList.value[categoryIndex].contain == "selected") {
           show = false;
         }
         if (
-          props.category.contain == "children" &&
-          page.post_parent != props.category.parent
+          categoriesList.value[categoryIndex].contain == "children" &&
+          page.post_parent != categoriesList.value[categoryIndex].parent
         ) {
           show = false;
         }
-        if (props.category.includes.includes(page.ID)) {
+        if (categoriesList.value[categoryIndex].includes.includes(page.ID)) {
           show = true;
         }
-        if (props.category.excludes.includes(page.ID)) {
+        if (categoriesList.value[categoryIndex].excludes.includes(page.ID)) {
           show = false;
         }
         return show;
       });
+      return pages;
+    };
 
-      //   // Eliminate all pages except children if applicable
-      //   if (props.category.contain == "children") {
-      //     display.value.forEach((page, index) => {
-      //       if (page.post_parent != props.category.parent) {
-      //         display.value.splice(index, 1);
-      //       }
-      //     });
-      //   }
-
-      //   // Include pages the category wants to include
-      //   const idMap = ref<number[]>(display.value.map((page) => page.ID));
-      //   props.category.includes.forEach((pageId) => {
-      //     if (!idMap.value.includes(pageId)) {
-      //       display.value.push(
-      //         pagesList.value.find((page) => page.ID == pageId)
-      //       )[0];
-      //     }
-      //   });
-
-      //   // Remove pages the category wants to exclude
-      //   display.value.forEach((page, index) => {
-      //     if (props.category.excludes.includes(page.ID)) {
-      //       display.value.splice(index, 1);
-      //     }
-      //   });
-
-      return display.value.sort((a, b) => b.menu_order - a.menu_order);
+    const displayablePages = computed(() => {
+      let displayPages = pagesForCategory(props.index).value;
+      if (props.category.contain == "unlisted") {
+        let categoriesPagesMap = categoriesList.value.map(
+          (category, index) => ({
+            pages: pagesForCategory(index).value,
+            contain: category.contain,
+          })
+        );
+        categoriesPagesMap.forEach((category, index) => {
+          if (index != props.index && category.contain != "unlisted") {
+            displayPages.forEach((page, j) => {
+              if (category.pages.indexOf(page) >= 0) {
+                displayPages.splice(j, 1);
+              }
+            });
+          }
+        });
+      }
+      return displayPages.sort((a, b) => b.menu_order - a.menu_order);
     });
 
     const includablePages = computed(() => {

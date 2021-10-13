@@ -4,7 +4,7 @@
  * Plugin Name: HTML Sitemap
  * Plugin URI: http://abhinash.net/
  * Description: Categorize pages for HTML sitemap
- * Version: 0.0.5
+ * Version: 0.0.6
  * Author: Abhinash Khatiwada
  * Author URI: http://abhinash.net/
  * Text Domain: html-sitemap
