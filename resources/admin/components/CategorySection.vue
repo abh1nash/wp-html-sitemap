@@ -6,6 +6,7 @@
         @delete="deleteCategory"
         @move="(position) => $emit('move', position)"
         :deletable="!category.isDefault"
+        :parent="category.parent"
         :name="category.name"
         :url="category.url"
         :contain="category.contain"

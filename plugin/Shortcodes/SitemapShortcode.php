@@ -55,6 +55,10 @@ class SitemapShortcode extends WordPressShortcodesServiceProvider {
          array_push( $parsedData[$index]["pages"], $page );
         }
       }
+      usort($parsedData[$index]['pages'], 
+            function ($a, $b) {
+              return $b->menu_order - $a->menu_order;
+            });
     }
 
     foreach ($parsedData as $i => $category) {
