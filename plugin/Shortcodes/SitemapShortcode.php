@@ -13,7 +13,7 @@ class SitemapShortcode extends WordPressShortcodesServiceProvider {
   public function renderSitemap( $atts = [ ], $content = null )
   {
     $categories = get_option('AK_SITEMAP_DATA');
-    $pages = get_pages();
+    $pages = get_pages(['sort_columns' => 'menu_order, post_title']);
     $parsedData = [];
 
     function canList($page, $category) 
@@ -55,10 +55,10 @@ class SitemapShortcode extends WordPressShortcodesServiceProvider {
          array_push( $parsedData[$index]["pages"], $page );
         }
       }
-      usort($parsedData[$index]['pages'], 
-            function ($a, $b) {
-              return $b->menu_order - $a->menu_order;
-            });
+//       usort($parsedData[$index]['pages'], 
+//             function ($a, $b) {
+//               return $b->menu_order - $a->menu_order;
+//             });
     }
 
     foreach ($parsedData as $i => $category) {
